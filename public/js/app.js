@@ -1,9 +1,8 @@
 // ============================================
-// APP.JS - Configurações Globais
+// APP.JS - Configurações Globais - Broostore Quiz
 // ============================================
 
 const CONFIG = {
-  // SUBSTITUA COM SUAS CREDENCIAIS DO SUPABASE
   SUPABASE_URL: 'https://mumraedfftxriaalmlnk.supabase.co',
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11bXJhZWRmZnR4cmlhYWxtbG5rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjEzMTAsImV4cCI6MjA4NjQ5NzMxMH0.iS0N6WCc9DYQ_N4JbxCYbDRmn_wgf6ZUW5G_qfZDv7Y',
   
@@ -28,16 +27,18 @@ const supabase = window.supabase.createClient(
 );
 
 // ============================================
-// UTILITÁRIOS
+// UTILITÁRIOS GLOBAIS
 // ============================================
 
 const Utils = {
+  // Formata número de moedas (1K, 1M)
   formatMoedas: (valor) => {
     if (valor >= 1000000) return (valor / 1000000).toFixed(1) + 'M';
     if (valor >= 1000) return (valor / 1000).toFixed(1) + 'K';
     return valor.toString();
   },
 
+  // Formata telefone (11) 99999-9999
   formatPhone: (value) => {
     return value
       .replace(/\D/g, '')
@@ -46,8 +47,11 @@ const Utils = {
       .substring(0, 15);
   },
 
+  // Toast notification
   toast: (mensagem, tipo = 'info', duracao = 3000) => {
     const container = document.getElementById('toast-container');
+    if (!container) return;
+    
     const toast = document.createElement('div');
     toast.className = `toast ${tipo}`;
     
@@ -71,7 +75,9 @@ const Utils = {
     }, duracao);
   },
 
+  // Loading state em botões
   setLoading: (btn, loading = true) => {
+    if (!btn) return;
     const text = btn.querySelector('.btn-text');
     const spinner = btn.querySelector('.btn-loading');
     
@@ -80,6 +86,7 @@ const Utils = {
     if (spinner) spinner.classList.toggle('hidden', !loading);
   },
 
+  // Redireciona se já estiver logado
   redirectIfLogged: async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
@@ -87,6 +94,7 @@ const Utils = {
     }
   },
 
+  // Redireciona se NÃO estiver logado (retorna user se logado)
   redirectIfNotLogged: async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -97,6 +105,8 @@ const Utils = {
   }
 };
 
+// Log de inicialização
 document.addEventListener('DOMContentLoaded', () => {
   console.log('🎮 Broostore Quiz iniciado');
+  console.log('📡 Supabase conectado:', CONFIG.SUPABASE_URL);
 });

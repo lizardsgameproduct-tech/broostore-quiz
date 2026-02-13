@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#16213e">
+  <title>Broostore Quiz - Loja</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/store.css">
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <button onclick="history.back()" class="icon-btn">←</button>
+      <h1>💎 Loja de Moedas</h1>
+      <div class="header-coins">
+        <span id="total-coins">🪙 0</span>
+      </div>
+    </header>
+
+    <main class="store-container">
+      <!-- Pacotes -->
+      <section class="packages">
+        <div class="package-card" data-package="starter">
+          <div class="package-icon">🥉</div>
+          <h3>Starter</h3>
+          <div class="package-coins">100 🪙</div>
+          <div class="package-price">R$ 5,00</div>
+          <button class="btn btn-primary btn-buy" data-amount="100" data-price="5.00">
+            Comprar
+          </button>
+        </div>
+
+        <div class="package-card popular" data-package="pro">
+          <div class="package-badge">MAIS POPULAR</div>
+          <div class="package-icon">🥈</div>
+          <h3>Pro</h3>
+          <div class="package-coins">250 🪙</div>
+          <div class="package-bonus">+25 bônus</div>
+          <div class="package-price">R$ 10,00</div>
+          <button class="btn btn-primary btn-buy" data-amount="275" data-price="10.00">
+            Comprar
+          </button>
+        </div>
+
+        <div class="package-card" data-package="mega">
+          <div class="package-icon">🥇</div>
+          <h3>Mega</h3>
+          <div class="package-coins">600 🪙</div>
+          <div class="package-bonus">+100 bônus</div>
+          <div class="package-price">R$ 20,00</div>
+          <button class="btn btn-primary btn-buy" data-amount="700" data-price="20.00">
+            Comprar
+          </button>
+        </div>
+
+        <div class="package-card vip" data-package="vip">
+          <div class="package-badge">VIP</div>
+          <div class="package-icon">💎</div>
+          <h3>VIP</h3>
+          <div class="package-coins">2.000 🪙</div>
+          <div class="package-bonus">+500 bônus + Status VIP</div>
+          <div class="package-price">R$ 50,00</div>
+          <button class="btn btn-primary btn-buy" data-amount="2500" data-price="50.00">
+            Comprar
+          </button>
+        </div>
+      </section>
+
+      <!-- Informações -->
+      <section class="store-info">
+        <h4>ℹ️ Informações</h4>
+        <ul>
+          <li>✅ Moedas compradas <strong>nunca expiram</strong></li>
+          <li>✅ Use para jogar quando quiser</li>
+          <li>✅ Pagamento seguro via PIX</li>
+          <li>✅ Crédito imediato após confirmação</li>
+        </ul>
+      </section>
+    </main>
+
+    <!-- Modal de Pagamento -->
+    <div id="payment-modal" class="modal hidden">
+      <div class="modal-content payment-content">
+        <h3>💳 Pagamento</h3>
+        <div class="payment-details">
+          <p>Pacote: <strong id="payment-package">Pro</strong></p>
+          <p>Moedas: <strong id="payment-coins">275</strong> 🪙</p>
+          <p>Total: <strong id="payment-total">R$ 10,00</strong></p>
+        </div>
+        
+        <div class="qr-container">
+          <div id="qr-code" class="qr-placeholder">
+            <p>Gerando QR Code...</p>
+          </div>
+          <p class="qr-instructions">
+            Escaneie com seu app bancário<br>
+            <small>Ou copie o código PIX abaixo</small>
+          </p>
+          <div class="pix-code-container">
+            <input type="text" id="pix-code" readonly>
+            <button id="btn-copy-pix" class="btn btn-secondary">Copiar</button>
+          </div>
+        </div>
+
+        <div class="payment-status" id="payment-status">
+          ⏳ Aguardando pagamento...
+        </div>
+
+        <button id="btn-cancel-payment" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/store.js"></script>
+</body>
+</html>

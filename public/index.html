@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#16213e">
+  <title>Broostore Quiz - Login</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="logo-header">
+      <div class="logo">🎮</div>
+      <h1>Broostore Quiz</h1>
+      <p>Show do Milhão</p>
+    </header>
+
+    <main class="auth-container">
+      <!-- Login -->
+      <section id="login-section" class="auth-section active">
+        <h2>Entrar</h2>
+        <form id="login-form">
+          <div class="input-group">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" required placeholder="seu@email.com">
+          </div>
+          <div class="input-group">
+            <label for="login-password">Senha</label>
+            <input type="password" id="login-password" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <span class="btn-text">Entrar</span>
+            <span class="btn-loading hidden">Carregando...</span>
+          </button>
+        </form>
+        <p class="auth-switch">
+          Não tem conta? <a href="#" id="show-register">Criar conta</a>
+        </p>
+      </section>
+
+      <!-- Cadastro -->
+      <section id="register-section" class="auth-section hidden">
+        <h2>Criar Conta</h2>
+        <form id="register-form">
+          <div class="input-group">
+            <label for="register-name">Nome completo</label>
+            <input type="text" id="register-name" required placeholder="Seu nome">
+          </div>
+          <div class="input-group">
+            <label for="register-email">Email</label>
+            <input type="email" id="register-email" required placeholder="seu@email.com">
+          </div>
+          <div class="input-group">
+            <label for="register-phone">WhatsApp</label>
+            <input type="tel" id="register-phone" placeholder="(11) 99999-9999">
+          </div>
+          <div class="input-group">
+            <label for="register-password">Senha</label>
+            <input type="password" id="register-password" required minlength="6" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="info-box">
+            <span class="info-icon">🎁</span>
+            <p>Você ganhará <strong>20 moedas grátis</strong> ao criar sua conta!</p>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <span class="btn-text">Criar Conta</span>
+            <span class="btn-loading hidden">Criando...</span>
+          </button>
+        </form>
+        <p class="auth-switch">
+          Já tem conta? <a href="#" id="show-login">Entrar</a>
+        </p>
+      </section>
+
+      <!-- Verificação Email -->
+      <section id="verify-section" class="auth-section hidden">
+        <div class="verify-icon">📧</div>
+        <h2>Verifique seu Email</h2>
+        <p>Enviamos um link de confirmação para <strong id="verify-email"></strong></p>
+        <p>Clique no link para ativar sua conta e receber suas 20 moedas!</p>
+        <button id="resend-email" class="btn btn-secondary">Reenviar email</button>
+      </section>
+    </main>
+
+    <footer class="auth-footer">
+      <p>🪙 20 moedas grátis todo dia | Reseta à meia-noite</p>
+    </footer>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/auth.js"></script>
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((reg) => console.log('SW registrado:', reg.scope))
+          .catch((err) => console.log('Erro SW:', err));
+      });
+    }
+  </script>
+</body>
+</html>

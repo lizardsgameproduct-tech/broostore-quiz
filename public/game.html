@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#16213e">
+  <title>Broostore Quiz - Jogar</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/game.css">
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <div class="logo-spin">🎮</div>
+      <p>Carregando...</p>
+    </div>
+  </div>
+
+  <!-- Header Fixo -->
+  <header class="game-header">
+    <div class="header-left">
+      <button id="btn-menu" class="icon-btn">☰</button>
+      <span class="user-name" id="user-name">Jogador</span>
+    </div>
+    
+    <div class="header-center">
+      <div class="coins-container">
+        <div class="coins-daily" id="coins-daily">
+          <span class="coin-icon">🪙</span>
+          <span class="coin-value" id="daily-value">20/20</span>
+        </div>
+        <div class="coins-bought" id="coins-bought">
+          <span class="coin-icon">💎</span>
+          <span class="coin-value" id="bought-value">0</span>
+        </div>
+      </div>
+      <div class="next-recharge" id="next-recharge">
+        ⏱️ Reseta em: 08:45:32
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <button id="btn-store" class="icon-btn store-btn" title="Loja de Moedas">🛒</button>
+      <button id="btn-logout" class="icon-btn" title="Sair">🚪</button>
+    </div>
+  </header>
+
+  <!-- Menu Lateral -->
+  <nav id="side-menu" class="side-menu">
+    <div class="menu-header">
+      <h3>Menu</h3>
+      <button id="btn-close-menu" class="icon-btn">✕</button>
+    </div>
+    <ul class="menu-list">
+      <li><a href="#" id="menu-ranking">🏆 Ranking</a></li>
+      <li><a href="#" id="menu-history">📜 Histórico</a></li>
+      <li><a href="#" id="menu-help">❓ Como Jogar</a></li>
+      <li><a href="#" id="menu-settings">⚙️ Configurações</a></li>
+    </ul>
+  </nav>
+  <div id="menu-overlay" class="menu-overlay"></div>
+
+  <!-- Tela Inicial do Jogo -->
+  <main id="game-start" class="game-container">
+    <div class="start-content">
+      <div class="prize-pyramid">
+        <h2>🏆 Prêmios</h2>
+        <div class="pyramid-levels">
+          <div class="level" data-level="15">R$ 1.000.000 🎯</div>
+          <div class="level" data-level="14">R$ 500.000</div>
+          <div class="level" data-level="13">R$ 300.000</div>
+          <div class="level" data-level="12">R$ 100.000</div>
+          <div class="level" data-level="11">R$ 50.000</div>
+          <div class="level active" data-level="10">R$ 10.000 ✅</div>
+          <div class="level" data-level="9">R$ 5.000</div>
+          <div class="level" data-level="8">R$ 3.000</div>
+          <div class="level" data-level="7">R$ 2.000</div>
+          <div class="level" data-level="6">R$ 1.000</div>
+          <div class="level active" data-level="5">R$ 500 ✅</div>
+          <div class="level" data-level="4">R$ 300</div>
+          <div class="level" data-level="3">R$ 200</div>
+          <div class="level" data-level="2">R$ 100</div>
+          <div class="level current" data-level="1">R$ 50 🎮</div>
+        </div>
+      </div>
+
+      <div class="start-actions">
+        <div class="cost-info">
+          <span>Custo: <strong>10 🪙</strong></span>
+          <span class="sequence" id="user-sequence">🔥 1 dia seguido</span>
+        </div>
+        <button id="btn-start-game" class="btn btn-primary btn-large">
+          <span class="btn-text">▶ JOGAR AGORA</span>
+        </button>
+        <p class="daily-info">20 moedas grátis todo dia!</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Tela do Quiz -->
+  <main id="game-play" class="game-container hidden">
+    <!-- Barra de Progresso -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+      <span class="progress-text">Nível <span id="current-level">1</span>/15</span>
+    </div>
+
+    <!-- Área da Pergunta -->
+    <div class="question-area">
+      <div class="question-header">
+        <span class="category" id="question-category">Geografia</span>
+        <span class="prize-value" id="current-prize">R$ 50</span>
+      </div>
+      
+      <div class="timer-container">
+        <div class="timer-bar" id="timer-bar"></div>
+        <span class="timer-text" id="timer-text">30s</span>
+      </div>
+
+      <div class="question-box">
+        <h2 id="question-text">Qual é a capital do Brasil?</h2>
+      </div>
+    </div>
+
+    <!-- Alternativas -->
+    <div class="answers-grid">
+      <button class="answer-btn" data-index="0">
+        <span class="answer-letter">A</span>
+        <span class="answer-text">São Paulo</span>
+      </button>
+      <button class="answer-btn" data-index="1">
+        <span class="answer-letter">B</span>
+        <span class="answer-text">Rio de Janeiro</span>
+      </button>
+      <button class="answer-btn" data-index="2">
+        <span class="answer-letter">C</span>
+        <span class="answer-text">Brasília</span>
+      </button>
+      <button class="answer-btn" data-index="3">
+        <span class="answer-letter">D</span>
+        <span class="answer-text">Salvador</span>
+      </button>
+    </div>
+
+    <!-- Ajudas -->
+    <div class="helps-container">
+      <button class="help-btn" id="help-skip" title="Pular (3 disponíveis)">
+        <span class="help-icon">⏭️</span>
+        <span class="help-count" id="count-skip">3</span>
+      </button>
+      <button class="help-btn" id="help-cards" title="Cartas">
+        <span class="help-icon">🃏</span>
+        <span class="help-count" id="count-cards">1</span>
+      </button>
+      <button class="help-btn" id="help-audience" title="Universitários">
+        <span class="help-icon">👥</span>
+        <span class="help-count" id="count-audience">1</span>
+      </button>
+      <button class="help-btn" id="help-chart" title="Placas">
+        <span class="help-icon">📊</span>
+        <span class="help-count" id="count-chart">1</span>
+      </button>
+    </div>
+
+    <!-- Botão Parar -->
+    <button id="btn-stop" class="btn btn-secondary btn-stop">
+      🛑 PARAR COM <span id="stop-prize">R$ 0</span>
+    </button>
+  </main>
+
+  <!-- Modal de Resultado -->
+  <div id="result-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="result-icon" id="result-icon">🎉</div>
+      <h2 id="result-title">Parabéns!</h2>
+      <p id="result-message">Você ganhou R$ 50!</p>
+      <div class="result-coins" id="result-coins">+10 🪙</div>
+      <div class="result-actions">
+        <button id="btn-continue" class="btn btn-primary">Continuar</button>
+        <button id="btn-exit" class="btn btn-secondary">Sair</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Ajuda - Cartas -->
+  <div id="cards-modal" class="modal hidden">
+    <div class="modal-content cards-content">
+      <h3>🃏 Cartas</h3>
+      <p>Escolha uma carta para eliminar alternativas:</p>
+      <div class="cards-grid">
+        <div class="card" data-card="1">🂠</div>
+        <div class="card" data-card="2">🂠</div>
+        <div class="card" data-card="3">🂠</div>
+        <div class="card" data-card="4">🂠</div>
+      </div>
+      <button class="btn btn-secondary btn-close-modal">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Modal de Ajuda - Placas -->
+  <div id="chart-modal" class="modal hidden">
+    <div class="modal-content chart-content">
+      <h3>📊 Placas</h3>
+      <p>O público votou:</p>
+      <div class="chart-bars" id="chart-bars">
+        <div class="chart-bar"><span>A</span><div style="height: 20%"></div></div>
+        <div class="chart-bar"><span>B</span><div style="height: 15%"></div></div>
+        <div class="chart-bar"><span>C</span><div style="height: 55%"></div></div>
+        <div class="chart-bar"><span>D</span><div style="height: 10%"></div></div>
+      </div>
+      <button class="btn btn-secondary btn-close-modal">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Modal de Sem Moedas -->
+  <div id="no-coins-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="result-icon">😢</div>
+      <h2>Moedas Insuficientes</h2>
+      <p>Você precisa de 10 🪙 para jogar</p>
+      <div class="result-actions">
+        <button id="btn-go-store" class="btn btn-primary">Comprar Moedas</button>
+        <button id="btn-wait" class="btn btn-secondary">
+          Aguardar ⏱️ <span id="wait-time">08:45</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay de Confirmação -->
+  <div id="confirm-overlay" class="confirm-overlay hidden">
+    <div class="confirm-box">
+      <h3>Confirmar Resposta?</h3>
+      <p id="confirm-answer">Alternativa C</p>
+      <div class="confirm-actions">
+        <button id="confirm-yes" class="btn btn-primary">Sim</button>
+        <button id="confirm-no" class="btn btn-secondary">Não</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/coins.js"></script>
+  <script src="/js/game.js"></script>
+</body>
+</html>

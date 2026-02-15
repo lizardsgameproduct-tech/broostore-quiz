@@ -91,24 +91,19 @@
 
   <div id="toast-container"></div>
 
- <!-- 1. Supabase SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- 2. Configurações (cria supabase e Utils) -->
-<script src="/js/app.js"></script>
-
-<!-- 3. Autenticação (usa supabase e Utils) -->
-<script src="/js/auth.js"></script>
-
-<!-- 4. Registra Service Worker -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then((reg) => console.log('SW registrado:', reg.scope))
-        .catch((err) => console.log('Erro SW:', err));
-    });
-  }
-</script>
+  <!-- SCRIPTS - ORDEM CORRETA E SEM DUPLICAÇÃO -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/auth.js"></script>
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((reg) => console.log('SW registrado:', reg.scope))
+          .catch((err) => console.log('Erro SW:', err));
+      });
+    }
+  </script>
 </body>
 </html>

@@ -2,54 +2,41 @@
 // APP.JS - Configurações Globais - Broostore Quiz
 // ============================================
 
-const CONFIG = {
-  // REMOVIDO ESPAÇO NO FINAL DA URL!
+var CONFIG = {
   SUPABASE_URL: 'https://mumraedfftxriaalmlnk.supabase.co',
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11bXJhZWRmZnR4cmlhYWxtbG5rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjEzMTAsImV4cCI6MjA4NjQ5NzMxMH0.iS0N6WCc9DYQ_N4JbxCYbDRmn_wgf6ZUW5G_qfZDv7Y',
   
-  // Custos do jogo
   CUSTO_JOGO: 10,
   PREMIO_NIVEL_5: 10000,
   PREMIO_NIVEL_10: 100000,
   PREMIO_NIVEL_15: 1000000,
-  
-  // Limites
   MOEDAS_INICIAIS: 20,
   MAX_MOEDAS_DIARIAS: 50,
-  
-  // Tempo
   TEMPO_PERGUNTA: 30,
 };
 
-// ============================================
-// INICIALIZAÇÃO DO SUPABASE (SÓ EXECUTA SE NÃO EXISTIR)
-// ============================================
-
-// Verifica se supabase já existe (evita duplicação)
+// Inicializa Supabase (usando var para evitar redeclaração)
 if (typeof window.supabaseClient === 'undefined') {
-  window.supabaseClient = window.supabase.createClient(
+  window.supabaseClient = supabase.createClient(
     CONFIG.SUPABASE_URL,
     CONFIG.SUPABASE_ANON_KEY
   );
 }
 
-// Referência global
-const supabase = window.supabaseClient;
+var supabase = window.supabaseClient;
 
 // ============================================
-// UTILITÁRIOS GLOBAIS
+// UTILITÁRIOS GLOBAIS (usando var)
 // ============================================
 
-const Utils = {
-  // Formata número de moedas (1K, 1M)
-  formatMoedas: (valor) => {
+var Utils = {
+  formatMoedas: function(valor) {
     if (valor >= 1000000) return (valor / 1000000).toFixed(1) + 'M';
     if (valor >= 1000) return (valor / 1000).toFixed(1) + 'K';
     return valor.toString();
   },
 
-  // Formata telefone (11) 99999-9999
-  formatPhone: (value) => {
+  formatPhone: function(value) {
     return value
       .replace(/\D/g, '')
       .replace(/^(\d{2})(\d)/g, '($1) $2')
@@ -57,50 +44,49 @@ const Utils = {
       .substring(0, 15);
   },
 
-  // Toast notification
-  toast: (mensagem, tipo = 'info', duracao = 3000) => {
-    const container = document.getElementById('toast-container');
+  toast: function(mensagem, tipo, duracao) {
+    tipo = tipo || 'info';
+    duracao = duracao || 3000;
+    
+    var container = document.getElementById('toast-container');
     if (!container) return;
     
-    const toast = document.createElement('div');
-    toast.className = `toast ${tipo}`;
+    var toast = document.createElement('div');
+    toast.className = 'toast ' + tipo;
     
-    const icones = {
+    var icones = {
       success: '✅',
       error: '❌',
       warning: '⚠️',
       info: 'ℹ️'
     };
     
-    toast.innerHTML = `
-      <span>${icones[tipo] || 'ℹ️'}</span>
-      <span>${mensagem}</span>
-    `;
+    toast.innerHTML = '<span>' + (icones[tipo] || 'ℹ️') + '</span><span>' + mensagem + '</span>';
     
     container.appendChild(toast);
     
-    setTimeout(() => {
+    setTimeout(function() {
       toast.style.animation = 'slideInRight 0.3s ease reverse';
-      setTimeout(() => toast.remove(), 300);
+      setTimeout(function() { toast.remove(); }, 300);
     }, duracao);
   },
 
-  // Loading state em botões
-  setLoading: (btn, loading = true) => {
+  setLoading: function(btn, loading) {
+    loading = loading !== false;
     if (!btn) return;
-    const text = btn.querySelector('.btn-text');
-    const spinner = btn.querySelector('.btn-loading');
+    
+    var text = btn.querySelector('.btn-text');
+    var spinner = btn.querySelector('.btn-loading');
     
     btn.disabled = loading;
     if (text) text.classList.toggle('hidden', loading);
     if (spinner) spinner.classList.toggle('hidden', !loading);
   },
 
-  // Redireciona se já estiver logado
-  redirectIfLogged: async () => {
+  redirectIfLogged: async function() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      var result = await supabase.auth.getUser();
+      if (result.data && result.data.user) {
         window.location.href = '/game.html';
       }
     } catch (err) {
@@ -108,15 +94,14 @@ const Utils = {
     }
   },
 
-  // Redireciona se NÃO estiver logado (retorna user se logado)
-  redirectIfNotLogged: async () => {
+  redirectIfNotLogged: async function() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      var result = await supabase.auth.getUser();
+      if (!result.data || !result.data.user) {
         window.location.href = '/index.html';
         return null;
       }
-      return user;
+      return result.data.user;
     } catch (err) {
       console.error('Erro ao verificar sessão:', err);
       window.location.href = '/index.html';
@@ -125,9 +110,4 @@ const Utils = {
   }
 };
 
-// Log de inicialização
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('🎮 Broostore Quiz iniciado');
-  console.log('📡 Supabase URL:', CONFIG.SUPABASE_URL);
-  console.log('✅ Supabase conectado:', !!supabase);
-});
+console.log('🎮 Broostore Quiz iniciado');

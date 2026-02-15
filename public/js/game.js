@@ -278,8 +278,8 @@ const Game = {
     // Seleciona
     btn.classList.add('selected');
     
-    // Mostra confirmação
-    const alternatives = JSON.parse(this.currentQuestion.alternativas);
+    // Mostra confirmação    
+    const alternatives = q.alternativas;
     document.getElementById('confirm-answer').textContent = `${String.fromCharCode(65 + index)}) ${alternatives[index]}`;
     document.getElementById('confirm-overlay').classList.remove('hidden');
     
@@ -473,4 +473,5 @@ const Game = {
 // Inicializa quando DOM carregar
 document.addEventListener('DOMContentLoaded', () => {
   Game.init();
+
 });

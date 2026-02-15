@@ -3,6 +3,7 @@
 // ============================================
 
 const CONFIG = {
+  // REMOVIDO ESPAÇO NO FINAL DA URL!
   SUPABASE_URL: 'https://mumraedfftxriaalmlnk.supabase.co',
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11bXJhZWRmZnR4cmlhYWxtbG5rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjEzMTAsImV4cCI6MjA4NjQ5NzMxMH0.iS0N6WCc9DYQ_N4JbxCYbDRmn_wgf6ZUW5G_qfZDv7Y',
   
@@ -20,11 +21,20 @@ const CONFIG = {
   TEMPO_PERGUNTA: 30,
 };
 
-// Inicializa Supabase
-const supabase = window.supabase.createClient(
-  CONFIG.SUPABASE_URL,
-  CONFIG.SUPABASE_ANON_KEY
-);
+// ============================================
+// INICIALIZAÇÃO DO SUPABASE (SÓ EXECUTA SE NÃO EXISTIR)
+// ============================================
+
+// Verifica se supabase já existe (evita duplicação)
+if (typeof window.supabaseClient === 'undefined') {
+  window.supabaseClient = window.supabase.createClient(
+    CONFIG.SUPABASE_URL,
+    CONFIG.SUPABASE_ANON_KEY
+  );
+}
+
+// Referência global
+const supabase = window.supabaseClient;
 
 // ============================================
 // UTILITÁRIOS GLOBAIS
@@ -88,25 +98,36 @@ const Utils = {
 
   // Redireciona se já estiver logado
   redirectIfLogged: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      window.location.href = '/game.html';
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        window.location.href = '/game.html';
+      }
+    } catch (err) {
+      console.error('Erro ao verificar sessão:', err);
     }
   },
 
   // Redireciona se NÃO estiver logado (retorna user se logado)
   redirectIfNotLogged: async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = '/index.html';
+        return null;
+      }
+      return user;
+    } catch (err) {
+      console.error('Erro ao verificar sessão:', err);
       window.location.href = '/index.html';
       return null;
     }
-    return user;
   }
 };
 
 // Log de inicialização
 document.addEventListener('DOMContentLoaded', () => {
   console.log('🎮 Broostore Quiz iniciado');
-  console.log('📡 Supabase conectado:', CONFIG.SUPABASE_URL);
+  console.log('📡 Supabase URL:', CONFIG.SUPABASE_URL);
+  console.log('✅ Supabase conectado:', !!supabase);
 });

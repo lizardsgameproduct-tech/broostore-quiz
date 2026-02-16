@@ -10,6 +10,7 @@ const Game = {
   timer: null,
   timeLeft: 30,
   isProcessing: false,
+  selectedAnswer: null,
   helps: {
     skip: 3,
     cards: 1,
@@ -182,6 +183,7 @@ const Game = {
       }
 
       this.currentQuestion = question;
+      this.selectedAnswer = null;
 
       // Atualiza UI
       this.updateQuestionUI();
@@ -207,12 +209,12 @@ const Game = {
     // Texto da pergunta
     document.getElementById('question-text').textContent = q.pergunta;
     
-    // Alternativas
-    const alternatives = JSON.parse(q.alternativas);
+    // ✅ CORRIGIDO: Usa alternativas direto (já é array)
+    const alternatives = q.alternativas;
     document.querySelectorAll('.answer-btn').forEach((btn, index) => {
       btn.classList.remove('selected', 'correct', 'wrong', 'eliminated');
       btn.disabled = false;
-      btn.querySelector('.answer-text').textContent = alternatives[index];
+      btn.querySelector('.answer-text').textContent = alternatives[index] || '';
     });
     
     // Progresso
@@ -258,6 +260,8 @@ const Game = {
       bar.style.background = 'var(--error)';
     } else if (this.timeLeft <= 20) {
       bar.style.background = 'var(--warning)';
+    } else {
+      bar.style.background = 'linear-gradient(90deg, var(--success), var(--warning), var(--error))';
     }
   },
 
@@ -278,9 +282,12 @@ const Game = {
     // Seleciona
     btn.classList.add('selected');
     
-    // Mostra confirmação    
-    const alternatives = q.alternativas;
-    document.getElementById('confirm-answer').textContent = `${String.fromCharCode(65 + index)}) ${alternatives[index]}`;
+    // ✅ CORRIGIDO: Usa this.currentQuestion em vez de q
+    const alternatives = this.currentQuestion.alternativas;
+    const letra = String.fromCharCode(65 + index); // A, B, C, D
+    const texto = alternatives[index] || '';
+    
+    document.getElementById('confirm-answer').textContent = `${letra}) ${texto}`;
     document.getElementById('confirm-overlay').classList.remove('hidden');
     
     this.selectedAnswer = index;
@@ -291,6 +298,13 @@ const Game = {
     
     if (!confirmed) {
       document.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('selected'));
+      this.selectedAnswer = null;
+      return;
+    }
+
+    // ✅ CORRIGIDO: Verifica se resposta foi selecionada
+    if (this.selectedAnswer === null || this.selectedAnswer === undefined) {
+      Utils.toast('Selecione uma resposta!', 'warning');
       return;
     }
 
@@ -298,6 +312,10 @@ const Game = {
     clearInterval(this.timer);
 
     try {
+      console.log('Enviando resposta:', this.selectedAnswer);
+      console.log('Game ID:', this.gameId);
+      console.log('Question ID:', this.currentQuestion.id);
+
       // Verifica resposta
       const { data: result, error } = await supabase.rpc('verificar_resposta', {
         p_game_id: this.gameId,
@@ -306,15 +324,20 @@ const Game = {
         p_tempo_gasto: 30 - this.timeLeft
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro Supabase:', error);
+        throw error;
+      }
+
+      console.log('Resultado:', result);
 
       // Mostra resultado visual
       await this.showAnswerResult(result);
 
       if (!result.correta) {
         // Errou
-        setTimeout(() => this.gameOver(false, 'Você errou!'), 2000);
-      } else if (result.game_over) {
+        setTimeout(() => this.gameOver(false, 'Que pena! Você errou.'), 2000);
+      } else if (this.currentLevel >= 15) {
         // Ganhou o jogo!
         setTimeout(() => this.gameWon(), 2000);
       } else {
@@ -323,8 +346,8 @@ const Game = {
       }
 
     } catch (err) {
-      console.error('Erro:', err);
-      Utils.toast('Erro ao verificar resposta', 'error');
+      console.error('Erro completo:', err);
+      Utils.toast('Erro ao verificar: ' + (err.message || 'Tente novamente'), 'error');
       this.isProcessing = false;
     }
   },
@@ -332,23 +355,25 @@ const Game = {
   async showAnswerResult(result) {
     const buttons = document.querySelectorAll('.answer-btn');
     
-    // Marca a correta
-    buttons[result.resposta_correta].classList.add('correct');
+    // Marca a correta em verde
+    if (result.resposta_correta !== undefined && buttons[result.resposta_correta]) {
+      buttons[result.resposta_correta].classList.add('correct');
+    }
     
-    // Se errou, marca a errada
-    if (!result.correta) {
+    // Se errou, marca a selecionada em vermelho
+    if (!result.correta && this.selectedAnswer !== null && buttons[this.selectedAnswer]) {
       buttons[this.selectedAnswer].classList.add('wrong');
     }
     
-    // Som
-    // await this.playSound(result.correta ? 'correct' : 'wrong');
+    // Desabilita todos os botões
+    buttons.forEach(btn => btn.disabled = true);
   },
 
   showNextModal() {
     const modal = document.getElementById('result-modal');
     document.getElementById('result-icon').textContent = '✅';
     document.getElementById('result-title').textContent = 'Correto!';
-    document.getElementById('result-message').textContent = `Você está no nível ${this.currentLevel + 1}`;
+    document.getElementById('result-message').textContent = `Você passou para o nível ${this.currentLevel + 1}`;
     document.getElementById('result-coins').textContent = this.getPrizeText();
     document.getElementById('btn-continue').textContent = 'Próxima Pergunta';
     
@@ -363,18 +388,25 @@ const Game = {
   },
 
   async gameWon() {
-    // Premia jogador
-    const prize = this.currentLevel === 15 ? 1000000 : (this.currentLevel === 10 ? 100000 : 10000);
+    // Calcula prêmio baseado no nível
+    let prize = 0;
+    if (this.currentLevel >= 15) prize = 1000000;
+    else if (this.currentLevel >= 10) prize = 100000;
+    else if (this.currentLevel >= 5) prize = 10000;
     
-    await supabase.rpc('premiar_jogador', {
-      p_game_id: this.gameId,
-      p_quantidade: prize
-    });
+    try {
+      await supabase.rpc('premiar_jogador', {
+        p_game_id: this.gameId,
+        p_quantidade: prize
+      });
+    } catch (err) {
+      console.error('Erro ao premiar:', err);
+    }
 
     const modal = document.getElementById('result-modal');
     document.getElementById('result-icon').textContent = '🏆';
     document.getElementById('result-title').textContent = 'PARABÉNS!';
-    document.getElementById('result-message').textContent = 'Você venceu o Quiz!';
+    document.getElementById('result-message').textContent = `Você conquistou ${this.getPrizeText()}!`;
     document.getElementById('result-coins').textContent = `+${prize.toLocaleString()} 🪙`;
     document.getElementById('btn-continue').textContent = 'Jogar Novamente';
     
@@ -400,10 +432,14 @@ const Game = {
     clearInterval(this.timer);
     
     // Finaliza jogo
-    await supabase
-      .from('quiz_games')
-      .update({ status: 'finalizado', parou: true })
-      .eq('id', this.gameId);
+    try {
+      await supabase
+        .from('quiz_games')
+        .update({ status: 'finalizado', parou: true, tempo_fim: new Date().toISOString() })
+        .eq('id', this.gameId);
+    } catch (err) {
+      console.error('Erro ao parar:', err);
+    }
     
     this.gameOver(true, `Você parou com ${this.getPrizeText()}`);
   },
@@ -424,54 +460,15 @@ const Game = {
 
   useCards() {
     if (this.helps.cards <= 0) return;
-    document.getElementById('cards-modal').classList.remove('hidden');
-  },
-
-  useAudience() {
-    if (this.helps.audience <= 0) return;
-    this.helps.audience--;
-    this.updateHelpsUI();
     
-    // Mostra dica aleatória (simulada)
-    const alternatives = JSON.parse(this.currentQuestion.alternativas);
-    const randomHint = Math.floor(Math.random() * 4);
-    Utils.toast(`Universitários sugerem: ${String.fromCharCode(65 + randomHint)}`, 'info');
-  },
-
-  useChart() {
-    if (this.helps.chart <= 0) return;
-    this.helps.chart--;
-    this.updateHelpsUI();
+    // Elimina 2 alternativas erradas
+    const correta = this.currentQuestion.correta;
+    const eliminar = [];
     
-    // Gera gráfico aleatório
-    const bars = document.querySelectorAll('.chart-bar div');
-    bars.forEach(bar => {
-      bar.style.height = `${Math.random() * 80 + 10}%`;
-    });
+    for (let i = 0; i < 4; i++) {
+      if (i !== correta && eliminar.length < 2) {
+        eliminar.push(i);
+      }
+    }
     
-    // A resposta certa tem mais chance de ser alta
-    const correctBar = bars[this.currentQuestion.correta];
-    correctBar.style.height = `${Math.random() * 30 + 50}%`;
-    
-    document.getElementById('chart-modal').classList.remove('hidden');
-  },
-
-  updateHelpsUI() {
-    document.getElementById('count-skip').textContent = this.helps.skip;
-    document.getElementById('count-cards').textContent = this.helps.cards;
-    document.getElementById('count-audience').textContent = this.helps.audience;
-    document.getElementById('count-chart').textContent = this.helps.chart;
-    
-    // Desabilita se acabou
-    document.getElementById('help-skip').disabled = this.helps.skip <= 0;
-    document.getElementById('help-cards').disabled = this.helps.cards <= 0;
-    document.getElementById('help-audience').disabled = this.helps.audience <= 0;
-    document.getElementById('help-chart').disabled = this.helps.chart <= 0;
-  }
-};
-
-// Inicializa quando DOM carregar
-document.addEventListener('DOMContentLoaded', () => {
-  Game.init();
-
-});
+    eliminar.forEach(idx
